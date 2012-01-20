@@ -1,0 +1,1 @@
+D:\Program Files\phonegap-1.2.0\Android\Primax\build.xml

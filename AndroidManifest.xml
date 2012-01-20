@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:windowSoftInputMode="adjustPan"
+      package="com.primax" android:versionName="1.1" android:versionCode="5">
+    <supports-screens
+    	android:largeScreens="true"
+    	android:normalScreens="true"
+    	android:smallScreens="true"
+    	android:resizeable="true"
+    	android:anyDensity="true"
+    	/>
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+
+    <application android:icon="@drawable/icon" android:label="@string/app_name"
+    	android:debuggable="false">
+		<activity android:name=".DefaultActivity" android:label="@string/app_name" 
+                  android:screenOrientation="portrait"
+				  android:configChanges="keyboardHidden|orientation">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+        </activity>
+        <activity android:name="com.phonegap.plugins.childBrowser.ChildBrowser" android:label="@string/app_name">
+            <intent-filter>
+            </intent-filter>
+        </activity>
+    </application>
+
+	<uses-sdk android:minSdkVersion="8" />
+</manifest> 

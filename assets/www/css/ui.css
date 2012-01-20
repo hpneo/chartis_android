@@ -1,0 +1,203 @@
+/**
+ * FIX: First Transition Blink
+ * https://github.com/jquery/jquery-mobile/issues/455#issuecomment-1579346 
+ */
+.ui-page {
+	/* http://www.w3schools.com/cssref/css3_pr_backface-visibility.asp */
+			backface-visibility: hidden;
+	-webkit-backface-visibility: hidden; /* safari */
+	/* END */
+}
+/* END */
+
+.ui-header {
+	height:43px;
+	overflow:hidden;
+}
+
+.ui-content div[data-iscroll="scroller"] {
+	/*position:absolute;*/
+	z-index:1;
+	width:100%;
+	overflow:hidden;
+}
+
+
+.ui-content {
+	position:absolute;
+	z-index:1;
+	left:0;
+	right:0;
+	top:45px;
+	/*bottom:49px;*/
+	padding:0;
+}
+
+.ui-content .ui-listview {
+	margin:0;
+}
+
+.ui-listview-filter {
+	margin:0;
+}
+
+.ui-btn-up-a, .ui-btn-up-b, .ui-btn-up-c,
+.ui-btn-down-a, .ui-btn-down-b, .ui-btn-down-c,
+.ui-btn-hover-a, .ui-btn-hover-b, .ui-btn-hover-c {
+	border:1px solid rgba(0,0,0,0.8);
+}
+
+.nav-primax .ui-btn .ui-btn-inner { 
+	padding: 30px 8px 0;
+}
+.nav-primax .ui-btn {
+	margin:3px 1px 0 !important;
+}
+
+.nav-primax .ui-btn-text {
+	font-size:.8em;
+	color:#a8a8a8;
+}
+.nav-primax .ui-btn-active .ui-btn-text {
+	color:#fff;
+}
+
+.nav-primax .ui-btn .ui-icon { 
+	top:2px;
+	
+	background-color: transparent;
+	background-position: center top;
+	background-repeat: no-repeat;
+
+	width: 31px !important;
+	height: 29px !important;
+	margin-left: -15px !important;
+	
+			box-shadow: none !important;
+	   -moz-box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+
+	-webkit-border-radius: 0 !important;
+	   -moz-border-radius: 0 !important;
+			border-radius: 0 !important;
+	
+}
+
+
+
+.nav-primax .ui-icon-primax-map {background-image: url('../images/footer-map.png');}
+.nav-primax .ui-btn-active .ui-icon-primax-map {background-position: center -29px;}
+.nav-primax .ui-icon-primax-address {background-image: url('../images/footer-list.png');}
+.nav-primax .ui-btn-active .ui-icon-primax-address {background-position: center -29px;}
+.nav-primax .ui-icon-primax-percent {background-image: url('../images/footer-promo.png');}
+.nav-primax .ui-btn-active .ui-icon-primax-percent {background-position: center -29px;}
+
+.nav-primax .ui-btn-up-a {
+	background:none;
+	border:none;
+}
+
+
+.ui-content .ui-listview .ui-btn-up-a,
+.ui-content .ui-listview .ui-btn-up-b,
+.ui-content .ui-listview .ui-btn-up-c,
+.ui-content .ui-listview .ui-btn-hover-a,
+.ui-content .ui-listview .ui-btn-hover-b,
+.ui-content .ui-listview .ui-btn-hover-c,
+.ui-content .ui-listview .ui-btn-down-a,
+.ui-content .ui-listview .ui-btn-down-b,
+.ui-content .ui-listview .ui-btn-down-c {
+	text-shadow:none;
+}
+
+
+.nav-primax .ui-btn-active,
+.nav-primax .ui-btn-active.ui-btn-hover-a {
+	background:none;
+	background-color:rgba(255,255,255,0.15);
+	border:none;
+	-webkit-border-radius: 3px;
+	   -moz-border-radius: 3px;
+			border-radius: 3px;
+
+}
+.nav-primax .ui-btn-hover-a {
+	background:none;
+	border:none;
+}
+
+.nav-primax .ui-btn-inner {
+	border:none;
+}
+
+.ui-footer {
+	background:#000 url('../images/footer-bg.png') repeat-x;
+	border:none;
+	height:49px;
+	/*overflow:hidden;*/
+}
+
+
+.ui-dialog.ui-overlay-a {
+	background:transparent url('../images/bg-dialog-ui.png');
+}
+
+.ui-btn-hover-primax,
+.ui-btn-up-primax {
+	border:1px solid rgba(19,30,58, 0.8); /* #131e3a */
+	text-decoration:none;
+	font-size:18px;
+	font-weight:bold;
+	line-height:19px;
+	color:#fff;
+	text-shadow:0 -1px 0 rgba(0,0,0, 0.7);
+	margin:0 0 10px 0;
+}
+.ui-btn-up-primax {
+	background:#1f5897 url('../images/button-bg.png') repeat-x;
+}
+.ui-btn-hover-primax {
+	background:#424242 url('../images/button-bg_hover.png') repeat-x;
+}
+
+.ui-btn-corner-all {
+	border-radius:5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+}
+
+.ui-btn-hover-primax .ui-btn-inner,
+.ui-btn-up-primax .ui-btn-inner {
+	border:none;
+	padding:0.58em 20px;
+}
+
+
+
+
+/* HD icon rules go here */
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
+
+	.ui-btn-hover-primax,
+	.ui-btn-up-primax {
+		background-size: 2px 40px;
+	}
+	.ui-btn-up-primax {
+		background:transparent url('../images/button-bg@2.png') repeat-x;
+	}
+	.ui-btn-hover-primax {
+		background:transparent url('../images/button-bg_hover@2x.png') repeat-x;
+	}
+
+	.ui-footer {
+		background:#000 url('../images/footer-bg@2.png') repeat-x;
+		background-size: 2px 49px;
+	}
+
+	.nav-primax .ui-btn .ui-icon {
+		background-size: 31px 58px;
+	}
+	.nav-primax .ui-icon-primax-map {background-image: url('../images/footer-map@2.png');}
+	.nav-primax .ui-icon-primax-address {background-image: url('../images/footer-list@2.png');}
+	.nav-primax .ui-icon-primax-percent {background-image: url('../images/footer-promo@2.png');}
+}
