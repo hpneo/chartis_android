@@ -33,6 +33,7 @@
 	<script type="text/javascript" src="assets/jquery.timeago.js"></script>
 	<!--<script type="text/javascript" src="assets/jquery.blockUI.js"></script>-->
 
+	<script type="text/javascript" src="clusterer.js"></script>
 	<script type="text/javascript" src="assets/iscroll.min.js"></script>
 	<script type="text/javascript" src="gmaps.min.js"></script>
 	<script type="text/javascript" src="app.js"></script>
@@ -62,7 +63,7 @@
 		<div data-role="header" data-position="inline">
 			<a href="#page-services">Servicios</a><!--  class="btn-address" -->
 			<h1>PRIMAX</h1>
-			<a href="#page-list">Buscar</a>
+			<a href="#page-main-search">Buscar</a>
 		</div><!-- /header -->
 
 		<div data-role="content">
@@ -176,7 +177,7 @@
 		         	<label for="radio-caminando">Caminando</label>
 			    </fieldset>
 			</h1>
-			<a href="#page-route">Inicio</a>
+			<a href="#page-route" style="display:none;" id="page-result-back">Inicio</a>
 		</div><!-- /header -->
 
 		<div data-role="content">
@@ -295,6 +296,11 @@
 		</div>
 
 		<div data-role="content">
+			<form class="ui-listview-filter search_stations" data-ajax="false"><input placeholder="Buscar" data-type="search" class="ui-input-text ui-body-c"></form>
+			<div data-iscroll="scroller">
+				<ul data-role="listview">
+				</ul>
+			</div>
 			<!-- Cargando... -->
 		</div>
 
@@ -324,7 +330,7 @@
 							<div class='message'><p></p></div>
 
 			                <div class='aviso'>
-								PROMOCIONES PRIMAX <span class="name"></span> <a href='#page-station-promos' class='space-l icon-24 icon-next'></a>
+								PROMOCIONES EN ESTA ESTACIÓN <a href='#page-station-promos' class='space-l icon-24 icon-next2'></a>
 							</div>
 						</div>
 			            
@@ -367,7 +373,11 @@
 		</div>
 
 		<div data-role="content">
-			<!-- Cargando... -->			
+			<form class="ui-listview-filter search_promos" data-ajax="false"><input placeholder="Buscar" data-type="search" class="ui-input-text ui-body-c"></form>
+			<div data-iscroll="scroller">
+				<ul data-role="listview">
+				</ul>
+			</div>
 		</div>
 
 		<div data-role="footer" data-id="mainFooter" data-position="fixed">
@@ -381,18 +391,19 @@
 		</div><!-- /footer -->
 	</div>
 
-
 	<div data-role="page" id="page-main-search">
 		<div data-role="header" data-position="inline" data-position="fixed">
 			<a href="#" data-rel="back" data-direction="reverse" class="btn-back">Atr&aacute;s</a>
-			<h1>Busqueda de Estaciones</h1>
+			<h1>Buscador</h1>
 		</div>
 
 		<div data-role="content">
-			<div class="content-inner">
-				<form>
-					<input type="search" name="search" id="main-search" value="" placeholder="Buscar:" />
-				</form>
+			<form class="ui-listview-filter search_stations ui-bar-c" data-ajax="false" style="-webkit-transition-property: -webkit-transform; -webkit-transform-origin-x: 0px; -webkit-transform-origin-y: 0px; -webkit-transform: translate3d(0px, 0px, 0px); -webkit-transition-duration: 0ms; ">
+				<input placeholder="Buscar" data-type="search" class="ui-input-text ui-body-c">
+			</form>
+			<div data-iscroll="scroller">
+				<ul data-role="listview">
+				</ul>
 			</div>
 		</div>
 
@@ -414,9 +425,8 @@
 		</div>
 
 		<div data-role="content">
-			<div class="content-inner">
-				<!-- JS -->
-			</div>
+			<ul data-role="listview">
+			</ul>
 		</div>
 
 		<div data-role="footer" data-id="mainFooter" data-position="fixed">
@@ -467,7 +477,7 @@
 
 						<hr />
 
-						<a href="#" onclick="$('.dialog-loader:visible').hide();" data-role="button" data-icon="delete">Cerrar</a>
+						<a href="#" onclick="$('.dialog-loader:visible .dialog').slideUp(400, function(){ $('.dialog-loader:visible').hide(); });" data-role="button" data-icon="delete">Cerrar</a>
 					</div>
 				</div>
 			</div>
@@ -475,7 +485,7 @@
 		<div data-role="header" data-position="inline" data-position="fixed">
 			<a href="#" data-rel="back" data-direction="reverse" class="btn-back">Atr&aacute;s</a>
 			<h1>Promoción</h1>
-			<a href="#page-services">Servicios</a><!--class="btn-address"-->
+			<a id="btn-share" href="#">Compartir</a>
 
 		</div>
 
@@ -488,9 +498,6 @@
 					</div>
 					<div class='aviso'>
 						Encuentra esta promoción en los siguientes PRIMAX <a href='#page-promo-stations' class='space-l icon-24 icon-next'></a>
-					</div>
-					<div class='center'>
-						<a id="btn-share" href="#" data-role="button" data-shadow="false" data-theme="primax">Compartir</a>
 					</div>
 				</div>
 			</div>
