@@ -109,21 +109,22 @@
 
 		<div data-role="content">
 			<div class="info-top">Selecciona los Servicios<br />que est&aacute;s buscando.</div>
-			<ul id="services-grid">
-				<li><img src="images/service1.png" width="91" height="87" /></li><!-- Combustibles Líquidos -->
-				<li><img src="images/service2.png" width="91" height="87" /></li><!-- GNV -->
-				<li><img src="images/service3.png" width="91" height="87" /></li><!-- GLP -->
-				<li><img src="images/service4.png" width="91" height="87" /></li><!-- Listo -->
-				<li><img src="images/service5.png" width="91" height="87" /></li><!-- Cajero BCP -->
-				<li><img src="images/service6.png" width="91" height="87" /></li><!-- Agencia BCP -->
-				<li><img src="images/service7.png" width="91" height="87" /></li><!-- Soat Pacífico -->
-				<li><img src="images/service8.png" width="91" height="87" /></li><!-- Wi - Fi -->
-				<li><img src="images/service9.png" width="91" height="87" /></li><!-- Direct Tv -->
-			</ul>
-			<div class="info-bottom">
-				<a href="#page-info"><img src="images/info.png" width="23" height="23" /></a>
+			<div data-iscroll="scroller">
+				<ul id="services-grid">
+					<li><img src="images/service1.png" width="91" height="87" /></li><!-- Combustibles Líquidos -->
+					<li><img src="images/service2.png" width="91" height="87" /></li><!-- GNV -->
+					<li><img src="images/service3.png" width="91" height="87" /></li><!-- GLP -->
+					<li><img src="images/service4.png" width="91" height="87" /></li><!-- Listo -->
+					<li><img src="images/service5.png" width="91" height="87" /></li><!-- Cajero BCP -->
+					<li><img src="images/service6.png" width="91" height="87" /></li><!-- Agencia BCP -->
+					<li><img src="images/service7.png" width="91" height="87" /></li><!-- Soat Pacífico -->
+					<li><img src="images/service8.png" width="91" height="87" /></li><!-- Wi - Fi -->
+					<li><img src="images/service9.png" width="91" height="87" /></li><!-- Direct Tv -->
+				</ul>
+				<div class="info-bottom">
+					<a href="#page-info"><img src="images/info.png" width="23" height="23" /></a>
+				</div>
 			</div>
-			
 		</div><!-- /content -->
 		
 		<div data-role="footer" data-id="mainFooter" data-position="fixed">
@@ -167,17 +168,17 @@
 			<a href="#" data-rel="back" data-direction="reverse">Editar</a>
 			<h1 class="notext">
 				<fieldset data-role="controlgroup" data-type="horizontal">
-		         	<input type="radio" class="icon-auto" name="radio-stations" id="radio-auto" value="driving" checked="checked"/>
-		         	<label class="ui-radio-on" for="radio-auto">Auto</label>
+         	<input type="radio" class="icon-auto" name="radio-stations" id="radio-auto" value="driving" checked="checked"/>
+         	<label class="ui-radio-on" for="radio-auto">Auto</label>
 
-		         	<input type="radio" class="icon-bus" name="radio-stations" id="radio-bus" value="bicycling"/>
-		         	<label for="radio-bus">Bus</label>
+         	<input type="radio" class="icon-bus" name="radio-stations" id="radio-bus" value="bicycling"/>
+         	<label for="radio-bus">Bus</label>
 
-		         	<input type="radio" class="icon-caminando" name="radio-stations" id="radio-caminando" value="walking"/>
-		         	<label for="radio-caminando">Caminando</label>
-			    </fieldset>
+         	<input type="radio" class="icon-caminando" name="radio-stations" id="radio-caminando" value="walking"/>
+         	<label for="radio-caminando">Caminando</label>
+			  </fieldset>
 			</h1>
-			<a href="#page-route" style="display:none;" id="page-result-back">Inicio</a>
+			<a href="#" id="page-result-back">Inicio</a>
 		</div><!-- /header -->
 
 		<div data-role="content">
@@ -209,15 +210,15 @@
 				<a id="route-cancel" href="#">Cancelar</a>
 				<h1 class="notext">
 					<fieldset data-role="controlgroup" data-type="horizontal">
-			         	<input type="radio" name="radio-stations" id="radio-auto" value="driving" checked="checked"/>
-			         	<label class="ui-radio-on" for="radio-auto">Auto</label>
+	         	<input type="radio" class="icon-auto" name="radio-stations" id="radio-auto" value="driving" checked="checked"/>
+	         	<label class="ui-radio-on" for="radio-auto">Auto</label>
 
-			         	<input type="radio" name="radio-stations" id="radio-bus" value="bicycling"/>
-			         	<label for="radio-bus">Bus</label>
+	         	<input type="radio" class="icon-bus" name="radio-stations" id="radio-bus" value="bicycling"/>
+	         	<label for="radio-bus">Bus</label>
 
-			         	<input type="radio" name="radio-stations" id="radio-caminando" value="walking"/>
-			         	<label for="radio-caminando">Caminando</label>
-				    </fieldset>
+	         	<input type="radio" class="icon-caminando" name="radio-stations" id="radio-caminando" value="walking"/>
+	         	<label for="radio-caminando">Caminando</label>
+				  </fieldset>
 				</h1>
 				<a id="route-search" href="#">Buscar</a>
 			</div>
@@ -319,17 +320,17 @@
 		<div data-role="header" data-position="inline"><!-- data-position="fixed" -->
 			<a href="#" data-rel="back" data-direction="reverse" class="btn-back">Atr&aacute;s</a>
 			<h1></h1>
-			<a href="#page-checkin">Check In</a>
+			<a href="#page-route">Direcciones</a>
 		</div>
 
 		<div data-role="content">
 			<div class="content-inner" data-iscroll="scroller">
 				<div>
 						<div id='page-info-mapa' class='content-mapa'>
-			                <div id="map-station" class="mapContainer"></div>
+              <div id="map-station" class="mapContainer"></div>
+              <a href="#page-checkin" data-theme="primax" data-role="button" data-shadow="false" class="half_button" style="margin:5px auto;width:70%">Check-in</a>
 							<div class='message'><p></p></div>
-
-			                <div class='aviso'>
+							<div class='aviso'>
 								PROMOCIONES EN ESTA ESTACIÓN <a href='#page-station-promos' class='space-l icon-24 icon-next2'></a>
 							</div>
 						</div>
@@ -356,18 +357,17 @@
 
 	<div data-role="page" id="page-promo">
 		<div data-role="header" data-position="inline" data-position="fixed">
-			
 			<h1 class="notext">
 				<fieldset data-role="controlgroup" data-type="horizontal">
-		         	<input type="radio" name="radio-promos" id="radio-todos" value="todos" checked="checked"/>
-		         	<label class="ui-radio-on" for="radio-todos">Todos</label>
+	         	<input type="radio"  name="radio-promos" id="radio-todos" value="todos" checked="checked"/>
+	         	<label class="ui-radio-on" for="radio-todos">Todos</label>
 
-		         	<input type="radio" name="radio-promos" id="radio-recientes" value="recientes"/>
-		         	<label for="radio-recientes">Recientes</label>
+	         	<input type="radio" name="radio-promos" id="radio-recientes" value="recientes"/>
+	         	<label for="radio-recientes">Recientes</label>
 
-		         	<input type="radio" name="radio-promos" id="radio-foursquare" value="foursquare"/>
-		         	<label for="radio-foursquare">Foursquare</label>
-			    </fieldset>
+	         	<input type="radio" name="radio-promos" id="radio-foursquare" value="foursquare"/>
+	         	<label for="radio-foursquare">Foursquare</label>
+		    </fieldset>
 			</h1>
 
 		</div>
@@ -444,14 +444,15 @@
 	<div data-role="page" id="page-promo-stations">
 		<div data-role="header" data-position="inline" data-position="fixed">
 			<a href="#" data-rel="back" data-direction="reverse" class="btn-back">Atr&aacute;s</a>
-			<h1>Estaciones con la Promoción</h1>
+			<h1>Estaciones</h1>
 		</div>
 
 		<div data-role="content">
 			<div class="content-inner">
-				
-				
-
+				<div class="GPS">
+					<a href="#"><span class="ui-icon-primax-gps">GPS</span></a>
+				</div>
+				<div id="map-promo-stations" class="mapContainer"></div>
 			</div>
 		</div>
 
@@ -490,15 +491,13 @@
 		</div>
 
 		<div data-role="content">
-			<div class="content-inner" data-iscroll="scroller">
-				<div>
-					<div class="message"><p></p></div>
-					<div class="bannerContainer">
-						<img src=""/>
-					</div>
-					<div class='aviso'>
-						Encuentra esta promoción en los siguientes PRIMAX <a href='#page-promo-stations' class='space-l icon-24 icon-next'></a>
-					</div>
+			<div class="content-inner">
+				<div class="message"><p></p></div>
+				<div class="bannerContainer">
+					<img src=""/>
+				</div>
+				<div class='aviso'>
+					Encuentra la promoción en estos Primax <a href='#page-promo-stations' class='space-l icon-24 icon-next2'></a>
 				</div>
 			</div>
 		</div>

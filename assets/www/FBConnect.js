@@ -80,7 +80,7 @@ FBConnect.install = function()
 // #
 FBConnect.prototype.postFBWall = function(message, urlPost, urlPicture, callBack)
 {
-	var url = 'https://graph.facebook.com/me/feed?access_token=' + this.accessToken + '&message=' + message;
+	var url = 'https://graph.facebook.com/me/feed?access_token=' + this.accessToken + '&message=' + encodeURIComponent('Disfrutando mi promoción PRIMAX') + '&name=' + message;
 
 	if (urlPost) {
 		url += '&link='+encodeURIComponent(urlPost);

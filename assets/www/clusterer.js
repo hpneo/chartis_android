@@ -195,7 +195,7 @@ MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_PATH_ =
 'images/map/pin-primax';
 //'images/m';
 
-MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_SIZE_ = [27,31];
+MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_SIZE_ = [40,40];
 
 
 /**
@@ -1054,7 +1054,7 @@ ClusterIcon.prototype.triggerClusterClick = function() {
     var markerClusterer = this.cluster_.getMarkerClusterer();
     
     // Trigger the clusterclick event.
-    google.maps.event.trigger(markerClusterer, 'clusterclick', this.cluster_);
+    //google.maps.event.trigger(markerClusterer, 'clusterclick', this.cluster_);
     
     if (markerClusterer.isZoomOnClick()) {
         // Zoom into the cluster.
@@ -1068,14 +1068,16 @@ ClusterIcon.prototype.triggerClusterClick = function() {
  * @ignore
  */
 ClusterIcon.prototype.onAdd = function() {
-    this.div_ = document.createElement('DIV');
+    this.div_ = document.createElement('div');
+
     if (this.visible_) {
         var pos = this.getPosFromLatLng_(this.center_);
         this.div_.style.cssText = this.createCss(pos);
-        //this.div_.innerHTML = this.sums_.text;
+        this.div_.innerHTML = this.sums_.text;
     }
     
     var panes = this.getPanes();
+    //panes.floatPane.appendChild(this.div_);
     panes.overlayMouseTarget.appendChild(this.div_);
     
     var that = this;
@@ -1214,7 +1216,9 @@ ClusterIcon.prototype.createCss = function(pos) {
     var style = ['text-decoration:none;'];
     style.push('background-image:url(' + this.url_ + ');');
     var backgroundPosition = this.backgroundPosition_ ? this.backgroundPosition_ : '0 0';
-    style.push('background-position:' + backgroundPosition + ';');
+    //style.push('background-position:' + backgroundPosition + ';');
+    style.push('background-position:center center;');
+    style.push('background-size:100% 100%;');
     
     if (typeof this.anchor_ === 'object') {
         if (typeof this.anchor_[0] === 'number' && this.anchor_[0] > 0 &&
@@ -1234,7 +1238,7 @@ ClusterIcon.prototype.createCss = function(pos) {
         }
     } else {
         style.push('height:' + this.height_ + 'px; line-height:' +
-                   (this.height_-5) + 'px; width:' + this.width_ + 'px; text-align:center;');
+                   (this.height_+1) + 'px; width:' + this.width_ + 'px; text-align:center;');
     }
     
     var txtColor = this.textColor_ ? this.textColor_ : 'black';
@@ -1242,7 +1246,7 @@ ClusterIcon.prototype.createCss = function(pos) {
     
     style.push('cursor:pointer; top:' + pos.y + 'px; left:' +
                pos.x + 'px; color:' + txtColor + '; position:absolute; font-size:' +
-               txtSize + 'px; font-family:Arial,sans-serif; font-weight:bold');
+               txtSize + 'px; font-family:Arial,sans-serif;');
     return style.join('');
 };
 

@@ -108,6 +108,7 @@ var app = app || (function($,undefined){
 	app.map 			= null;
 	app.mapResult 		= null;
 	app.mapRoute 		= null;
+	app.mapPromoStations = null;
 	app.currentMap		= null;
 	app.retina 			= (window.devicePixelRatio > 1);
 	app.placesLoading 	= false;
@@ -123,18 +124,12 @@ var app = app || (function($,undefined){
 	app.services = window.static_services;
   app.scrolls = {};
   app.clusterer = null;
+  app.viewWidth = document.width;
 
 	app.ready = function(){
 		$.info('[ready]');
 
-		if(app.retina){
-      MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_PATH_ = 'images/map/pin-primax@2x';
-      MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_SIZE_ = [54,62];
-    }
-    else{
-      MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_PATH_ = 'images/map/pin-primax';
-      MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_SIZE_ = [27,31];
-    }
+		MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_PATH_ = 'images/group_background';
 
     app.servicesList = [];
     app.servicesList['Combustibles Líquidos']   = 1;
@@ -296,6 +291,8 @@ var app = app || (function($,undefined){
 								address: ''
 							};
 
+							app.markerLocation.setPosition(new google.maps.LatLng(app.routeLocation.lat, app.routeLocation.lng));
+
 							// GET address with GeoCode (reverse)
 							app.geocode({
 								lat: app.routeLocation.lat,
@@ -310,6 +307,7 @@ var app = app || (function($,undefined){
 											break;
 									}
 									app.setRoute(app.stationSelected, app.routeLocation, app.routeTravelMode);
+									app.currentMap.setCenter(latlng.lat(), latlng.lng());
 									$('#edit-route').hide();
 
 								} //callback
@@ -347,7 +345,7 @@ var app = app || (function($,undefined){
         app.polygons = [];
 
 		$('#page-route #route-left').css({cursor:'auto'});
-		$('#page-route #route-left .ui-icon').css({opacity:0.3});
+		//$('#page-route #route-left .ui-icon').css({opacity:0.3});
 
 
 		$('#page-route #route-left').click(function(e){
@@ -385,17 +383,18 @@ var app = app || (function($,undefined){
         $('#page-route #route-right .ui-icon').css({opacity:1.0});
       }
 			
-			app.polygons[app.step_index] = app.currentMap.drawPolyline({
-				path: app.step[app.step_index].path,
-				strokeColor: app.routeColor,
-				strokeOpacity: 0.4,
-				strokeWeight: 6
-			});
+			if(app.step[app.step_index])
+				app.polygons[app.step_index] = app.currentMap.drawPolyline({
+					path: app.step[app.step_index].path,
+					strokeColor: app.routeColor,
+					strokeOpacity: 0.4,
+					strokeWeight: 6
+				});
 			$('#page-route h1:eq(1)').text((app.step_index+2) + ' de ' + (app.step.length+1));
-			app.currentMap.setCenter( app.step[app.step_index].end_point.lat(), app.step[app.step_index].end_point.lng() );
+			if(app.step[app.step_index])
+				app.currentMap.setCenter( app.step[app.step_index].end_point.lat(), app.step[app.step_index].end_point.lng() );
 			
 			if(app.step_index == app.step.length - 1){
-				//$('#page-route .message p').html('Encontramos PONNIES!!!');
 				$('#page-route .message p').html("Llegaste al <strong>PRIMAX</strong> de " + app.stationSelected.name);
 			}else{
 				$('#page-route .message p').html(app.step[app.step_index].instructions);
@@ -409,7 +408,7 @@ var app = app || (function($,undefined){
 
 			if( app.step_index == app.step.length ){
 				$('#page-route #route-right').css({cursor:'auto'});
-				$('#page-route #route-right .ui-icon').css({opacity:0.3});
+				//$('#page-route #route-right .ui-icon').css({opacity:0.3});
 			}
 		});
 		
@@ -420,8 +419,10 @@ var app = app || (function($,undefined){
 		app.currentMap.removeOverlays();
 		app.currentMap.removePolylines();
 
-		app.setMarkerCurrentPosition({location:vLocation, type:'dot'}); //{location:vLocation, pinType:'red'});
+		app.setMarkerCurrentPosition({location:vLocation}); //{location:vLocation, pinType:'red'});
 		app.stationSelected = vPlace;
+
+		app.currentMap.setCenter(vLocation.lat, vLocation.lng);
 
 		// Add Marker
 		var marker = app.currentMap.addMarker({
@@ -481,7 +482,7 @@ var app = app || (function($,undefined){
 			travelMode: vTravelMode,
 			origin: [vLocation.lat, vLocation.lng],
 			destination: [vPlace.lat, vPlace.lng],
-			callback: function(e){
+			callback: function(e, s){
 				if(e.length>0){
 					route = e[e.length-1];
 
@@ -504,15 +505,20 @@ var app = app || (function($,undefined){
 
 					//$.mobile.hidePageLoadingMsg();
 					app.notification.activityStop();
-				}
 				
-				app.route = new GMaps.Route({
-					map: app.currentMap,
-					route: e[0],
-					strokeColor: app.routeColor,
-					strokeOpacity: 0.7,
-					strokeWeight: 6
-				});
+					app.route = new GMaps.Route({
+						map: app.currentMap,
+						route: e[0],
+						strokeColor: app.routeColor,
+						strokeOpacity: 0.7,
+						strokeWeight: 6
+					});
+				}
+				else{
+					app.alert('No se pudo encontrar una ruta a esta estación.');
+					app.loader.hide();
+					history.back();
+				}
 			}
         });
 	};
@@ -545,12 +551,6 @@ var app = app || (function($,undefined){
 		}
 
 		//app.location = {lat:-12.1192704, lng:-77.0336914};
-
-		if( app.markerSelected == undefined ){
-			alert('no marker selected');
-			app.alert('no marker selected');
-			return;
-		}
 
 		app.stationSelected = app.markerSelected.station;
 
@@ -610,7 +610,7 @@ var app = app || (function($,undefined){
 
 		switch( $page.attr('id') ){
 			case 'page-promo-details':
-	      $('#btn-share').bind(clickEvent, function(e){
+	      $('#btn-share').live(clickEvent, function(e){
 	        e.preventDefault();
 
 	        $('#promo-dialog-loader').show();
@@ -723,6 +723,10 @@ var app = app || (function($,undefined){
 
 			case 'page-promo-details':
 				section = 'page-promo';
+
+				height = app.contentHeight-$.mobile.activePage.find('.message').height()-$.mobile.activePage.find('.aviso').height();
+				$.mobile.activePage.find('.bannerContainer').height(height);
+				$.mobile.activePage.find('.bannerContainer').css('line-height', height);
 				break;
 			default:
 				section = page_id;
@@ -758,7 +762,10 @@ var app = app || (function($,undefined){
 				app.jqXHR = $.getJSON(window.domainBase + "offers.json?callback=?&place_id=" + app.stationSelected.id)
 				.success(function(data){
 					if( data.length ) {
+						$.mobile.activePage.find('.search_promos').show();
 						app.offerSelected = null;
+
+						app.stationSelected.offers = data;
 
 						var content = '';
 						$.each(data, function(){
@@ -778,7 +785,9 @@ var app = app || (function($,undefined){
 							});
 						});
 					}else {
-						$.mobile.activePage.find('div:jqmData(role="content")').find('ul[data-role="listview"]:first').append('<li><img src="images/error_background.png" width="'+$(document).width()+'" /></li>');
+	          app.loader.hide();
+						$.mobile.activePage.find('.search_promos').hide();
+	          $.mobile.activePage.find('div:jqmData(role="content")').find('ul[data-role="listview"]:first').append('<li><img src="images/error_background.png" width="'+app.viewWidth+'" /></li>');
 					}
 
 					$.mobile.fixedToolbars.show(true);
@@ -792,8 +801,14 @@ var app = app || (function($,undefined){
 
 				break;
 
-				case 'page-promo-stations':
-				$page.find('div:jqmData(role="content")').html('');
+			case 'page-promo-stations':
+				var $header = $('div:jqmData(role="header"):visible');
+				var $footer = $('div:jqmData(role="footer"):visible');
+				app.contentHeight = app.getHeight() - $header.outerHeight() - $footer.outerHeight();
+
+				$('div:jqmData(role="content"):visible .content-inner')
+						.height( app.contentHeight );
+				
 				$.mobile.fixedToolbars.show(true);
 
 				$.log('offer_id:'+ app.offerSelected.id);
@@ -802,37 +817,88 @@ var app = app || (function($,undefined){
 					.success(function(data){
 						app.jqXHR = null;
 						app.stationsPromo = data;
-						$.log(app.stationsPromo);
 
-						if( app.stationsPromo.length == 0 ){
-							$page.find('div:jqmData(role="content")').html('No se encontraron datos.');
-							$.mobile.fixedToolbars.show(true);
-							return;
-						}
+						app.setLocation({
+							success: function(){
+								app.mapPromoStations = app.mapPromoStations || new GMaps({
+				          div: '#map-promo-stations',
+				          lat: app.location.lat,
+				          lng: app.location.lng,
+				          zoom: 13,
+				          disableDefaultUI: true,
+				          click: function(e){
+				            if( app.overlayItem ){
+				              app.currentMap.removeOverlay(app.overlayItem);
+				            }
+				          } 
+				        });
 
-						var content = '<ul data-role="listview">'; //' data-filter="true" data-filter-placeholder="Buscar">';
-						//content += '<li><h3>Estaciones</h3></li>';
-						
-						$.each(app.stationsPromo, function(index){
-							content += '<li><a href="#page-station-details" data-place="'+index+'" ><h3>'+ this.name +'</h3><p>'+this.address+'</p></a></li>';
-						});
-						
+				        app.currentMap = app.mapPromoStations;
+		        		app.currentMap.fixResize();
 
-						content += '</ul>';
+				        if(app.overlayItem)
+									app.currentMap.removeOverlay(app.overlayItem);
+								app.currentMap.removeMarkers();
 
-						$page.find('div:jqmData(role="content")')
-							.html(content)
-							.find('ul:first').listview();
-						
-						$.mobile.fixedToolbars.show(true);
+				        app.setMarkerCurrentPosition();
+				        app.currentMap.setCenter(app.location.lat, app.location.lng);
 
-						//--
-						$page.find('a[href="#page-station-details"]').each(function(index){
-							$(this).click(function(e){
-								var place = $(this).attr('data-place');
+								if( app.stationsPromo.length == 0 ){
+									app.alert('No existen estaciones con esta promoción.');
+									$.mobile.fixedToolbars.show(true);
+									return;
+								}
+								else{
+									app.addPlacesInMap(data);
+									bounds = new google.maps.LatLngBounds(app.currentMap.markers[0].getPosition(), app.currentMap.markers[1].getPosition());
 
-								app.stationSelected = app.stationsPromo[place];
-							});
+									app.currentMap.map.fitBounds(bounds);
+								}
+								$.mobile.fixedToolbars.show(true);
+							},
+							error: function(){
+								app.location = {
+				          lat: -12.055605255747423,
+				          lng: -77.02729189416506
+				        };
+
+								app.mapPromoStations = app.mapPromoStations || new GMaps({
+				          div: '#map-promo-stations',
+				          lat: app.location.lat,
+				          lng: app.location.lng,
+				          zoom: 13,
+				          disableDefaultUI: true,
+				          click: function(e){
+				            if( app.overlayItem ){
+				              app.currentMap.removeOverlay(app.overlayItem);
+				            }
+				          } 
+				        });
+
+				        app.currentMap = app.mapPromoStations;
+		        		app.currentMap.fixResize();
+
+				        if(app.overlayItem)
+									app.currentMap.removeOverlay(app.overlayItem);
+								app.currentMap.removeMarkers();
+
+				        app.setMarkerCurrentPosition();
+				        app.currentMap.setCenter(app.location.lat, app.location.lng);
+
+								if( app.stationsPromo.length == 0 ){
+									app.alert('No existen estaciones con esta promoción.');
+									$.mobile.fixedToolbars.show(true);
+									return;
+								}
+								else{
+									app.addPlacesInMap(data);
+
+									bounds = new google.maps.LatLngBounds(app.currentMap.markers[0].getPosition(), app.currentMap.markers[1].getPosition());
+									
+									app.currentMap.map.fitBounds(bounds);
+								}
+								$.mobile.fixedToolbars.show(true);
+							}
 						});
 					})
 					.error(function(data){
@@ -892,7 +958,6 @@ var app = app || (function($,undefined){
 			
 				$('div:jqmData(role="content"):visible .content-inner')
 						.height( app.contentHeight );
-				
 
 				$page.find('.message p').html( app.stationSelected.address );
 				$page.find('.subtitle .name').html( app.stationSelected.name );
@@ -949,30 +1014,8 @@ var app = app || (function($,undefined){
           } //click
         }); //addMarker
         app.stationSelected.marker = marker;
-				/*
-				marker.shadow = new google.maps.MarkerImage(
-					'images/map/pin-shadow'+(app.retina ? '@2' : '')+'.png',
-					new google.maps.Size(52,32),
-					new google.maps.Point(0,0),
-					new google.maps.Point(16,32),
-					(app.retina ? new google.maps.Size(50,32) : null)
-				);
-				*/
-				/*
-				marker.shape = {
-					coord: [13,0,10,2,8,5,8,8,8,11,10,14,11,17,12,20,13,23,14,26,15,29,18,29,19,26,20,23,21,20,22,17,23,14,25,11,25,8,25,5,23,2,20,0], //optimized
-					type: 'poly'
-				};
-				*/
-				// END
-
 				
-
-
-				// Fix Scroll
-				//app.myScroll = new iScroll('wrapper');
-				//app.scrolls[$.mobile.activePage.attr('id')] = new iScroll($page.find('[data-iscroll="scroller"]').get(0), {desktopCompatibility:true});
-
+				app.markerSelected = app.stationSelected.marker;
 
 				if( app.stationSelected.services_ids.length > 0 )
 				{
@@ -1186,29 +1229,28 @@ var app = app || (function($,undefined){
 		var msg = '';
 		switch(data.statusText){
 			case 'timeout':
-				//msg = 'Se ha superado el tiempo máximo de carga. Vuelva a intentarlo más tarde.';
-				msg = '<img src="images/error_background.png" />';
-				//msg += '<img src="images/back_button.png" class="back_button" />';
+				msg = 'Se ha superado el tiempo máximo de carga. Vuelva a intentarlo más tarde.';
 				break;
 			
 			case 'abort':
-				msg = '<p>Lo sentimos, no pudieron cargarse los datos. Por favor vuelva a intentarlo.</p>';
+				msg = 'Lo sentimos, no pudieron cargarse los datos. Por favor vuelva a intentarlo.';
 				break;
 
 			default:
-				msg = '<p>Hubo un inconveniente al solicitar los datos. Por favor vuelva a intentarlo.</p>';
+				msg = 'Hubo un inconveniente al solicitar los datos. Por favor vuelva a intentarlo.';
 				$.error(data);
 				break;
 		}
 
 		if( $content == undefined || $content.length == 0){
 			app.alert(msg);
-			$page.find('div:jqmData(role="content")').find('img:first').css('width', $.mobile.activePage.width());
-			//$('.back_button').css('top', $.mobile.activePage.height()-$.mobile.activePage.find('div:jqmData(role="footer")').height());
 		}else{
-			$content.html(msg);
+			if(data.statusText=='timeout')
+				$.mobile.activePage.find('div:jqmData(role="content")').find('ul[data-role="listview"]:first').append('<li><img src="images/timeout_background.png" width="'+app.viewWidth+'" /></li>');
+			else
+				$.mobile.activePage.find('div:jqmData(role="content")').find('ul[data-role="listview"]:first').append('<li><img src="images/error_background.png" width="'+app.viewWidth+'" /></li>');
+			//$content.html(msg);
 		}
-		
 	}
 
 	app.setScroll = function($elm){
@@ -1221,9 +1263,7 @@ var app = app || (function($,undefined){
     var contentHeight = app.getHeight() - $header.outerHeight() - $footer.outerHeight();
     if($.mobile.activePage.find('.search_stations').length > 0)
       $wrapper.height( contentHeight - $elm.find('.search_stations').outerHeight());
-    else
-      $wrapper.height( contentHeight );
-    if($.mobile.activePage.find('.search_promos').length > 0)
+    else if($.mobile.activePage.find('.search_promos').length > 0 && $elm.find('.search_promos').css('display')!='none')
       $wrapper.height( contentHeight - $elm.find('.search_promos').outerHeight());
     else
       $wrapper.height( contentHeight );
@@ -1284,9 +1324,16 @@ var app = app || (function($,undefined){
 				break;
 
 			case 'page-promo-details':
+				var $header = $('div:jqmData(role="header"):visible');
+				var $footer = $('div:jqmData(role="footer"):visible');
+				app.contentHeight = app.getHeight() - $header.outerHeight() - $footer.outerHeight();
+
+				$.mobile.activePage.find('div:jqmData(role="content") .content-inner')
+						.height( app.contentHeight );
 				page.find('.dialog-loader').hide();
 
-				page.find('.bannerContainer').width( app.getWidth() );
+				page.find('.bannerContainer').width( app.getWidth());
+				page.find('.aviso').width( app.getWidth() - 24);
 
 				$('#page-promo-details .message p').html( app.offerSelected.name );
 				$('#page-promo-details .bannerContainer img').attr('src', app.offerSelected['banner_' + (app.retina ? 'hd' : 'normal')] );
@@ -1294,7 +1341,7 @@ var app = app || (function($,undefined){
 				$('#page-promo-details .btn-twitter').click(function(e){
 					e.preventDefault();
 					//$('[data-role="content"]:visible').html('').css({'font-size':'11px'});
-					app.navigateToURL('http://twitter.com/share?lang=es&url=' + encodeURIComponent(app.offerSelected['banner_hd']) + '&text=' + encodeURIComponent(app.offerSelected.name) );
+					app.navigateToURL('http://twitter.com/share?url=' + encodeURIComponent(app.offerSelected['banner_hd']) + '&text=' + encodeURIComponent(app.offerSelected.name) + '&lang=es');
 				});
 
 				$('#page-promo-details .btn-facebook').click(function(e){
@@ -1303,7 +1350,7 @@ var app = app || (function($,undefined){
 					//$('[data-role="content"]:visible').html('').css({'font-size':'11px'});
 					//app.navigateToURL('http://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(app.offerSelected['banner_hd']) + '&text=' + encodeURIComponent(app.offerSelected.name) );
 
-					app.fbShare(app.offerSelected.name, app.offerSelected['banner_hd'], app.offerSelected['banner_hd']);
+					app.fbShare("Disfrutando mi promoción PRIMAX", app.offerSelected['banner_hd'], app.offerSelected['banner_hd']);
 				});
 
 				
@@ -1431,6 +1478,7 @@ var app = app || (function($,undefined){
 
 			window.plugins.fbConnect.postFBWall(message, url, image, function() {
 				app.notification.activityStop();
+				app.alert('Promoción compartida exitosamente.');
 			});
 		}
 
@@ -1513,6 +1561,7 @@ var app = app || (function($,undefined){
 		app.jqXHR = $.getJSON(window.domainBase + 'offers.json?callback=?' + (app.retina ? '&retina=true' : '') + '&type=' + filter )
 			.success(function(data){
 				if(data.length > 0){
+					$.mobile.activePage.find('.search_promos').show();
 					app.jqXHR = null;
 					app.offers = data;
 					app.offerSelected = null;
@@ -1538,8 +1587,10 @@ var app = app || (function($,undefined){
 					});
 				}
 				else{
-					$.mobile.activePage.find('div:jqmData(role="content")').find('ul[data-role="listview"]:first').append('<li><img src="images/error_background.png" /></li>');
-					$.mobile.activePage.find('div:jqmData(role="content")').find('img:first').css('width', $(document).width());
+					//$.mobile.activePage.find('div[data-iscroll="scroller"]').height()
+          app.loader.hide();
+					$.mobile.activePage.find('.search_promos').hide();
+          $.mobile.activePage.find('div:jqmData(role="content")').find('ul[data-role="listview"]:first').append('<li><img src="images/error_background.png" width="'+app.viewWidth+'" /></li>');
 				}
 				app.setScroll($.mobile.activePage);
 			})
@@ -1660,22 +1711,27 @@ var app = app || (function($,undefined){
 		$('#services-search').bind(clickEvent,function(e){
 			e.preventDefault();
 
-			$('.ui-page:visible .dialog-loader').show();
-
 			var servicesSelected = [];
+
 			$('#services-grid li img').each(function(index){
 				if( $(this).attr('src').indexOf('over') > -1 ){
 					servicesSelected.push( app.services[index].id );
 				}
 			});
 
-
-			app.tmpPlaces = app.places;
-			app.setPlaces({
-				services: servicesSelected,
-				success: $.mobile.changePage,
-				successParams: ['#page-result']
-			});
+			if(servicesSelected.length==0){
+				app.alert('Debe elegir al menos un servicio para obtener resultados.');
+				return false;
+			}
+			else{
+				$('.ui-page:visible .dialog-loader').show();
+				app.tmpPlaces = app.places;
+				app.setPlaces({
+					services: servicesSelected,
+					success: $.mobile.changePage,
+					successParams: ['#page-result']
+				});
+			}
 			
 		});
 		$('#services-cancel').bind(clickEvent,function(e){
@@ -1722,41 +1778,24 @@ var app = app || (function($,undefined){
 	}
 
 	app.onShowServices = function(e){
-		//$('#dialog-loader').css({display:'none'});
-			/*
-		$.getJSON(domainBase + 'services.json?callback=?')
-			.success(function(data){
-				app.services = data;
-			*/
-				var contentList = '';
-				contentList += '<div data-iscroll="scroller">';
-				contentList += '<div>';
-				contentList += '<ul data-role="listview">';
-				$.each(app.services, function(){
-					contentList += '<li>';
-					contentList += 	'<img src="images/empty.png" width="62" height="63" data-place="'+ this.id +'" class="icon-service-'+ app.servicesIcon[this.id] +'"/>';
-					contentList += 	'<div class="li-inner">';
-					contentList += 		'<h3>'+ this.name +'</h3>';
-					contentList += 		'<p>'+ (this.description || '') +'</p>';
-					contentList += 	'</div>';
-					contentList += '</li>';
-				});
-				contentList += '</ul>';
-				contentList += '</div>';
-				contentList += '</div>';
+		var contentList = '';
+		contentList += '<div data-iscroll="scroller">';
+		contentList += '<div>';
+		contentList += '<ul data-role="listview">';
+		$.each(app.services, function(){
+			contentList += '<li>';
+			contentList += 	'<img src="images/empty.png" width="62" height="63" data-place="'+ this.id +'" class="icon-service-'+ this.id +'"/>';
+			contentList += 	'<div class="li-inner">';
+			contentList += 		'<h3>'+ this.name +'</h3>';
+			contentList += 		'<p>'+ (this.description || '') +'</p>';
+			contentList += 	'</div>';
+			contentList += '</li>';
+		});
+		contentList += '</ul>';
+		contentList += '</div>';
+		contentList += '</div>';
 
-				$('#page-info div:jqmData(role="content")').html(contentList);
-			/*
-			})
-			.error(function(data){
-				$.error(data);
-
-				if( data.statusText == 'timeout'){
-					alert('Se ha superado el tiempo máximo de carga. Vuelva a intentarlo más tarde.');
-				}
-			});
-			*/
-
+		$('#page-info div:jqmData(role="content")').html(contentList);
 	};
 	
 	app.onInitMain = function(e){
@@ -1783,7 +1822,7 @@ var app = app || (function($,undefined){
 			// --
 		});
 
-		$('#page-main .GPS a').bind(clickEvent, function(e){
+		$('#page-main .GPS a, #page-promo-stations .GPS a').bind(clickEvent, function(e){
 			e.preventDefault();
 			
 			// Remove Overlay Item
@@ -1797,6 +1836,7 @@ var app = app || (function($,undefined){
 			app.setLocation({
 				success: function(){
 					app.markerLocation = app.setMarkerCurrentPosition({type:'dot'});
+          app.currentMap.setCenter(app.location.lat, app.location.lng);
 				}
 			});
 		});
@@ -1873,18 +1913,6 @@ var app = app || (function($,undefined){
 		//app.notification.activityStart();
 		$('#map').text('');
 
-    // tmp_places = [];
-
-    // for(i in window.places['lima']){
-    //   for(j in window.places['lima'][i].places)
-    //     tmp_places.push(window.places['lima'][i].places[j]);
-    // }
-
-    // for(i in window.places['provincias']){
-    //   for(j in window.places['provincias'][i].places)
-    //     tmp_places.push(window.places['provincias'][i].places[j]);
-    // }
-
     app.map = app.map || new GMaps({
       div: '#map',
       lat: -12.042007,
@@ -1898,25 +1926,23 @@ var app = app || (function($,undefined){
       idle: function(e){
         if(app.currentMap.map.getZoom() >= 14){
           for(i in app.currentMap.markers){
-            if(app.currentMap.map.getBounds().contains(app.currentMap.markers[i].getPosition())){
-              app.currentMap.markers[i].setMap(app.currentMap.map);
-            }
-            else{
-              app.currentMap.markers[i].setMap(null);
-            }
+          	if(app.currentMap.markers[i].title!='Ubicación Actual')
+	            if(app.currentMap.map.getBounds().contains(app.currentMap.markers[i].getPosition())){
+	              app.currentMap.markers[i].setMap(app.currentMap.map);
+	            }
+	            else{
+	              app.currentMap.markers[i].setMap(null);
+	            }
           }
         }
       },
       zoom_changed: function(e){
         markers_in_viewport = [];
-        markers_out_viewport = [];
         for(i in app.currentMap.markers){
-          if(app.currentMap.map.getBounds().contains(app.currentMap.markers[i].getPosition())){
-            markers_in_viewport.push(app.currentMap.markers[i]);
-          }
-          else{
-            markers_out_viewport.push(app.currentMap.markers[i]);
-          }
+        	if(app.currentMap.markers[i].title!='Ubicación Actual')
+	          if(app.currentMap.map.getBounds().contains(app.currentMap.markers[i].getPosition())){
+	            markers_in_viewport.push(app.currentMap.markers[i]);
+	          }
         }
         
         app.clusterer.clearMarkers();
@@ -1925,11 +1951,10 @@ var app = app || (function($,undefined){
           app.clusterer.addMarkers(markers_in_viewport);
         }
         delete markers_in_viewport;
-        delete markers_out_viewport;
       }
     });
     app.currentMap = app.map;
-    app.clusterer = new MarkerClusterer(app.currentMap.map, [], {gridSize: 50, maxZoom: 15});
+    app.clusterer = new MarkerClusterer(app.currentMap.map, [], {gridSize: 60, maxZoom: 15});
 
     app.setLocation({
       success:function(){
@@ -2016,6 +2041,19 @@ var app = app || (function($,undefined){
 		$.info('[onShowResultForService]');
 		
 		if( app.mapResult == null) return;
+
+		setTimeout(function(){
+			$('#page-result-back').live('click', function(e){
+				e.preventDefault();
+
+				if(app.markerSelected)
+					$.mobile.changePage('#page-route');
+				else{
+					app.alert('Debe seleccionar una estación para iniciar el recorrido.');
+				}
+					
+			});
+		}, 200);
 		
 		// Check if have a class ui-radio-on and active radio
 		$('.ui-page:visible .ui-radio label').each(function(index){
@@ -2132,77 +2170,36 @@ var app = app || (function($,undefined){
 		var oLocation = (options.location ? options.location : app.location);
 
 		// Add Marker
-		var marker = app.currentMap.addMarker( $.extend({
-			flat: true,
-			//optimized: false,
-			visible: true,
-			title: 'Ubicación Actual'
-		}, oLocation) ); //addMarker
-
-		if( options.type == 'dot' )
-		{
-			marker.icon = new google.maps.MarkerImage(
-				'images/map/location'+(app.retina ? '@2' : '')+'.png',
-				new google.maps.Size(17,17),
-				new google.maps.Point(0,0),
-				new google.maps.Point(9,9),
-				new google.maps.Size(17,17)
-			);
-			/*
-			marker.shape = {
-				coord: [13,0,15,1,16,2,17,3,18,4,19,5,19,6,19,7,19,8,19,9,19,10,19,11,19,12,19,13,18,14,19,15,19,16,18,17,18,18,16,19,3,19,2,18,1,17,0,16,0,15,1,14,0,13,0,12,0,11,0,10,0,9,0,8,0,7,0,6,0,5,1,4,2,3,3,2,4,1,6,0,13,0],
-				type: 'poly'
-			};
-			*/
+		if(app.markerLocation){
+			app.markerLocation.setPosition(new google.maps.LatLng(oLocation.lat, oLocation.lng));
+			app.markerLocation.setMap(app.currentMap.map);
+			var marker = app.markerLocation;
 		}
-		else
-		{
-			if( options.pinType == 'primax'){
-				marker.icon = new google.maps.MarkerImage(
-					'images/map/pin-'+ options.pinType +(app.retina ? '@2x' : '')+'.png',
-					new google.maps.Size(27,31),
+		else{
+			var marker = app.currentMap.addMarker( $.extend({
+				flat: true,
+				//optimized: false,
+				visible: true,
+				title: 'Ubicación Actual',
+				icon: new google.maps.MarkerImage(
+					'images/map/location'+(app.retina ? '@2' : '')+'.png',
+					new google.maps.Size(17,17),
 					new google.maps.Point(0,0),
-					new google.maps.Point(2,29),
-					(app.retina ? new google.maps.Size(27,31) : null)
-				);
-				/*
-				marker.shape = {
-					coord: [16,1,12,4,9,8,9,13,12,18,5,22,1,25,1,30,2,35,9,35,11,30,10,25,16,23,24,21,28,18,30,13,30,8,27,3,23,1],
-	  				type: 'poly'
-				};
-				*/
-			}else{
-				marker.icon = new google.maps.MarkerImage(
-					'images/map/pin-'+ options.pinType +(app.retina ? '@2x' : '')+'.png',
-					new google.maps.Size(16,37),
-					new google.maps.Point(0,0),
-					new google.maps.Point(8,37),
-					(app.retina ? new google.maps.Size(16,37) : null)
-				);
-				/*
-				marker.shape = {
-					coord: [10,0,12,1,13,2,14,3,15,4,15,5,15,6,15,7,15,8,15,9,15,10,15,11,15,12,14,13,13,14,11,15,9,16,9,17,9,18,9,19,9,20,9,21,9,22,9,23,9,24,9,25,9,26,9,27,9,28,9,29,9,30,9,31,9,32,11,33,11,34,11,35,11,36,4,36,4,35,5,34,5,33,7,32,7,31,7,30,7,29,7,28,7,27,7,26,7,25,7,24,7,23,7,22,7,21,7,20,7,19,7,18,7,17,7,16,5,15,3,14,2,13,1,12,1,11,0,10,0,9,0,8,0,7,0,6,1,5,1,4,2,3,3,2,4,1,6,0,10,0],
-	  				type: 'poly'
-				};
-				*/
-			}
-			
+					new google.maps.Point(9,9),
+					new google.maps.Size(17,17)
+				)
+			}, oLocation) ); //addMarker
 		}
+		app.markerLocation = marker;
 
-		options.center && app.currentMap.setCenter(oLocation.lat, oLocation.lng);
-		//end
-
-		// FIX pulse
-		if( marker.title == 'Ubicación Actual'){
-			app.activatePulse();
-		}
-
+		//app.activatePulse();
 		return marker;
 	};
 
 	app.activatePulse = function(){
 		var dom1 = $.mobile.activePage.find('.mapContainer map area[title="Ubicación Actual"]:first');
 		var dom2 = $.mobile.activePage.find('.mapContainer div[title="Ubicación Actual"]:first');
+		var dom3 = $.mobile.activePage.find('.mapContainer img[src="images/map/location.png"]:first');
 		if(dom1.length){
 			$dom = dom1.parent().parent();
 			$dom.addClass('pulseDOM');
@@ -2218,10 +2215,16 @@ var app = app || (function($,undefined){
 				$dom.addClass('mobile');
 			}
 			//$dom.parent().css({'z-index':2});
+		}else if(dom3.length){
+			$dom = dom3.parent();
+			$dom.addClass('pulseDOM');
+			if($.support.touch){
+				$dom.addClass('mobile');
+			}
+			//$dom.parent().css({'z-index':2});
 		}else{
 			setTimeout( app.activatePulse, 1500);
 		}
-			
 	}
 
 
@@ -2478,74 +2481,77 @@ $('.search_promos').live('submit', function(e){
 $('.search_stations').live('submit', function(e){
   e.preventDefault();
 
-  filtered_places = [];
-
-  term = new RegExp($.mobile.activePage.find('.ui-input-text').val(), 'i');
-
   app.zone = app.zone || 'lima';
 
-  for(i in window.places[app.zone]){
-    p = window.places[app.zone][i];
-    if(p.places){
-      for(j in p.places){
-        if((p.places[j].address.search(term) > -1 || p.places[j].name.search(term) > -1 || p.name.search(term) > -1) && !arrayContains(filtered_places, p)){
-          p.internal_index = i;
-          filtered_places.push(p);
-        }
-      }
-    }
+  if($.mobile.activePage.find('.ui-input-text').val()==''){
+  	app.stations = [window.places[app.zone][0], window.places[app.zone][1]];
+  }
+  else{
+  	filtered_places = [];
+  	term = new RegExp($.mobile.activePage.find('.ui-input-text').val(), 'i');
+	  for(i in window.places[app.zone]){
+	    p = window.places[app.zone][i];
+	    if(p.places){
+	      for(j in p.places){
+	        if((p.places[j].address.search(term) > -1 || p.places[j].name.search(term) > -1 || p.name.search(term) > -1) && !arrayContains(filtered_places, p)){
+	          p.internal_index = i;
+	          filtered_places.push(p);
+	        }
+	      }
+	    }
+	  }
+
+	  for(i in filtered_places){
+	    p = filtered_places[i];
+	    if(p.places){
+	      for(var j=0;j<p.places.length;j++){
+	        if(p.places[j].address.search(term) == -1 && p.places[j].name.search(term) == -1){
+	          p.places.splice(j, 1);
+	          j--;
+	        }
+	      }
+	    }
+	  }
+	  for(var i=0;i<filtered_places.length;i++){
+	    p = filtered_places[i];
+	    if(p.places && p.places.length == 0){
+	      filtered_places.splice(i, 1);
+	      i--;
+	    }
+	  }
+
+	  app.stations = filtered_places;
   }
 
-  for(i in filtered_places){
-    p = filtered_places[i];
-    if(p.places){
-      for(var j=0;j<p.places.length;j++){
-        if(p.places[j].address.search(term) == -1 && p.places[j].name.search(term) == -1){
-          p.places.splice(j, 1);
-          j--;
-        }
-      }
-    }
-  }
-  for(var i=0;i<filtered_places.length;i++){
-    p = filtered_places[i];
-    if(p.places && p.places.length == 0){
-      filtered_places.splice(i, 1);
-      i--;
-    }
-  }
-
-  app.stations = filtered_places;
-
-    var content = '';
+  var content = '';
       
-      for(i in app.stations){
-        places_by_district = app.stations[i];
-        content += '<li data-role="list-divider">'+ places_by_district.name +'</li>';
+  for(i in app.stations){
+    places_by_district = app.stations[i];
+    content += '<li data-role="list-divider">'+ places_by_district.name +'</li>';
 
-        $.each(places_by_district.places, function(index){
-          content += '<li><a href="#page-station-details" data-index="'+i+'" data-district="'+places_by_district.name+'" data-place="'+index+'" ><h3>'+ this.name +'</h3><p>'+this.address+'</p></a></li>';
-        });
-      };
-
-    $.mobile.activePage.find('div:jqmData(role="content")').find('ul:first').html(content);
-    $.mobile.activePage.find('div:jqmData(role="content")').find('ul:first').listview("refresh");
-
-    setTimeout(function () {
-      app.scrolls[$.mobile.activePage.attr('id')].refresh();
-    }, 0);
-    
-    $.mobile.fixedToolbars.show(true);
-
-    $.mobile.activePage.find('a.ui-link-inherit').each(function(index){
-      $(this).click(function(e){
-        var i = $(this).attr('data-index');
-        var district = $(this).attr('data-district');
-        var place = $(this).attr('data-place');
-
-        app.stationSelected = app.stations[i].places[place];
-      });
+    $.each(places_by_district.places, function(index){
+      content += '<li><a href="#page-station-details" data-index="'+i+'" data-district="'+places_by_district.name+'" data-place="'+index+'" ><h3>'+ this.name +'</h3><p>'+this.address+'</p></a></li>';
     });
+  };
+
+  $.mobile.activePage.find('div:jqmData(role="content")').find('ul:first').html(content);
+  $.mobile.activePage.find('div:jqmData(role="content")').find('ul:first').listview("refresh");
+
+  setTimeout(function () {
+    app.scrolls[$.mobile.activePage.attr('id')].refresh();
+  }, 0);
+    
+  $.mobile.fixedToolbars.show(true);
+
+  $.mobile.activePage.find('a.ui-link-inherit').each(function(index){
+    $(this).click(function(e){
+      var i = $(this).attr('data-index');
+      var district = $(this).attr('data-district');
+      var place = $(this).attr('data-place');
+
+      app.stationSelected = app.stations[i].places[place];
+    });
+  });
 });
 
 $('.load_more').live('click', function(e){
@@ -2587,7 +2593,8 @@ $('.load_more').live('click', function(e){
         var district = $(this).attr('data-district');
         var place = $(this).attr('data-place');
 
-        app.stationSelected = app.stations[i].places[place];
+        if(i)
+        	app.stationSelected = app.stations[i].places[place];
       });
     });
   }
