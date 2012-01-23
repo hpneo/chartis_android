@@ -726,7 +726,7 @@ var app = app || (function($,undefined){
 
 				height = app.contentHeight-$.mobile.activePage.find('.message').height()-$.mobile.activePage.find('.aviso').height();
 				$.mobile.activePage.find('.bannerContainer').height(height);
-				$.mobile.activePage.find('.bannerContainer').css('line-height', height);
+				$.mobile.activePage.find('.bannerContainer').css('line-height', height+'px');
 				break;
 			default:
 				section = page_id;
