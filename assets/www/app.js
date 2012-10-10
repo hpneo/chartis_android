@@ -125,6 +125,7 @@ var app = app || (function($,undefined){
   app.scrolls = {};
   app.clusterer = null;
   app.viewWidth = document.width;
+  app.loadMore = true;
 
 	app.ready = function(){
 		$.info('[ready]');
@@ -1274,7 +1275,17 @@ var app = app || (function($,undefined){
       app.scrolls[$elm.attr('id')].refresh();
     }
     else{
-      app.scrolls[$elm.attr('id')] = new iScroll($wrapper.get(0), {desktopCompatibility:true});
+      app.scrolls[$elm.attr('id')] = new iScroll($wrapper.get(0), {
+      	desktopCompatibility : true,
+      	onScrollEnd : function() {
+      		parent = this.scroller.parentElement.parentElement.parentElement;
+
+      		if(this.y == this.maxScrollY && parent.id == "page-list") {
+      			$('.load_more').trigger('click');
+      			app.loadMore = true;
+      		}
+      	}
+      });
     }
 		// $wrapper = $elm.find('[data-iscroll="scroller"]');
 		// if($wrapper.length == 0) return;
@@ -2557,7 +2568,7 @@ $('.search_stations').live('submit', function(e){
 $('.load_more').live('click', function(e){
   e.preventDefault();
 
-  if(app.current_loaded[app.zone] < window.places[app.zone].length){
+  if(app.current_loaded[app.zone] < window.places[app.zone].length && app.loadMore){
     start_from = [window.places[app.zone][app.current_loaded[app.zone]], window.places[app.zone][app.current_loaded[app.zone]+1]];
     app.stations.push(window.places[app.zone][app.current_loaded[app.zone]]);
     app.stations.push(window.places[app.zone][app.current_loaded[app.zone]+1]);
@@ -2577,6 +2588,7 @@ $('.load_more').live('click', function(e){
       $(content).insertBefore('#page-list .ui-content .ui-listview .load_more');
       $('.ui-listview').listview("refresh");
       setTimeout(function () {
+      	app.loadMore = false;
         app.scrolls[$.mobile.activePage.attr('id')].refresh();
         app.scrolls[$.mobile.activePage.attr('id')].scrollTo(0, app.scrolls[$.mobile.activePage.attr('id')].maxScrollY, 800);
       }, 0);
