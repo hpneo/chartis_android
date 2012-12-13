@@ -80,6 +80,6 @@
          in order to avoid having your file be overridden by tools such as "android update project"
     -->
     <!-- version-tag: 1 -->
-    <import file="${sdk.dir}/tools/ant/build.xml" />
+    <import file="/home/hpneo/Descargas/android-sdk-linux/tools/ant/build.xml" />
 
 </project>

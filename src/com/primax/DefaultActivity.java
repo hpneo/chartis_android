@@ -1,7 +1,8 @@
 package com.primax;
 
 import android.os.Bundle;
-import com.phonegap.*;
+
+import com.phonegap.DroidGap;
 
 public class DefaultActivity extends DroidGap
 {

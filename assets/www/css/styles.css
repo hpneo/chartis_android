@@ -1345,6 +1345,10 @@ hr {
     background:transparent url('../images/btn-back-hover@2x.png') no-repeat;
 }
 
+.load_more {
+	display: none;
+}
+
 .load_more .ui-link-inherit{
 	text-align:center;
 }
@@ -1395,7 +1399,8 @@ hr {
 #map-promo-stations{
 	height:100%;
 }
-.aviso{
-	position:absolute;
-	bottom:0;
+
+.aviso.absolute {
+  position: absolute;
+  bottom: 0;
 }

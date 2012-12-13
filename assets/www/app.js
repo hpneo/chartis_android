@@ -125,6 +125,7 @@ var app = app || (function($,undefined){
   app.scrolls = {};
   app.clusterer = null;
   app.viewWidth = document.width;
+  app.loadMore = true;
 
 	app.ready = function(){
 		$.info('[ready]');
@@ -157,7 +158,7 @@ var app = app || (function($,undefined){
         $('.route-start').width($('.route-final').width()+10);
       }
 			if( app.currentMap ){
-				app.currentMap.fixResize();
+				app.currentMap.refresh();
 			}
 		});
 
@@ -575,7 +576,7 @@ var app = app || (function($,undefined){
 					} 
 				});
 				app.currentMap = app.mapRoute;
-				app.currentMap.fixResize();
+				app.currentMap.refresh();
 
 				app.setRoute(app.stationSelected, app.location, app.resultTravelMode);
 				
@@ -598,7 +599,7 @@ var app = app || (function($,undefined){
           } 
         });
         app.currentMap = app.mapRoute;
-        app.currentMap.fixResize();
+        app.currentMap.refresh();
 
         app.setRoute(app.stationSelected, app.location, app.resultTravelMode);
       }
@@ -826,6 +827,9 @@ var app = app || (function($,undefined){
 				          lng: app.location.lng,
 				          zoom: 13,
 				          disableDefaultUI: true,
+				          markerClusterer: function(map) {
+				          	return new MarkerClusterer(map);
+				          },
 				          click: function(e){
 				            if( app.overlayItem ){
 				              app.currentMap.removeOverlay(app.overlayItem);
@@ -834,7 +838,7 @@ var app = app || (function($,undefined){
 				        });
 
 				        app.currentMap = app.mapPromoStations;
-		        		app.currentMap.fixResize();
+		        		app.currentMap.refresh();
 
 				        if(app.overlayItem)
 									app.currentMap.removeOverlay(app.overlayItem);
@@ -850,9 +854,9 @@ var app = app || (function($,undefined){
 								}
 								else{
 									app.addPlacesInMap(data);
-									bounds = new google.maps.LatLngBounds(app.currentMap.markers[0].getPosition(), app.currentMap.markers[1].getPosition());
+									//bounds = new google.maps.LatLngBounds(app.currentMap.markers[0].getPosition(), app.currentMap.markers[1].getPosition());
 
-									app.currentMap.map.fitBounds(bounds);
+									//app.currentMap.map.fitBounds(bounds);
 								}
 								$.mobile.fixedToolbars.show(true);
 							},
@@ -868,6 +872,9 @@ var app = app || (function($,undefined){
 				          lng: app.location.lng,
 				          zoom: 13,
 				          disableDefaultUI: true,
+				          markerClusterer: function(map) {
+				          	return new MarkerClusterer(map);
+				          },
 				          click: function(e){
 				            if( app.overlayItem ){
 				              app.currentMap.removeOverlay(app.overlayItem);
@@ -876,7 +883,7 @@ var app = app || (function($,undefined){
 				        });
 
 				        app.currentMap = app.mapPromoStations;
-		        		app.currentMap.fixResize();
+		        		app.currentMap.refresh();
 
 				        if(app.overlayItem)
 									app.currentMap.removeOverlay(app.overlayItem);
@@ -893,9 +900,9 @@ var app = app || (function($,undefined){
 								else{
 									app.addPlacesInMap(data);
 
-									bounds = new google.maps.LatLngBounds(app.currentMap.markers[0].getPosition(), app.currentMap.markers[1].getPosition());
+									//bounds = new google.maps.LatLngBounds(app.currentMap.markers[0].getPosition(), app.currentMap.markers[1].getPosition());
 									
-									app.currentMap.map.fitBounds(bounds);
+									//app.currentMap.map.fitBounds(bounds);
 								}
 								$.mobile.fixedToolbars.show(true);
 							}
@@ -989,7 +996,7 @@ var app = app || (function($,undefined){
               e.stopPropagation();
           } 
         });
-        app.mapStation.fixResize();
+        app.mapStation.refresh();
         app.mapStation.setCenter(app.stationSelected.lat, app.stationSelected.lng);
 
         app.mapStation.removeMarkers();
@@ -1274,7 +1281,17 @@ var app = app || (function($,undefined){
       app.scrolls[$elm.attr('id')].refresh();
     }
     else{
-      app.scrolls[$elm.attr('id')] = new iScroll($wrapper.get(0), {desktopCompatibility:true});
+      app.scrolls[$elm.attr('id')] = new iScroll($wrapper.get(0), {
+      	desktopCompatibility : true,
+      	onScrollEnd : function() {
+      		parent = this.scroller.parentElement.parentElement.parentElement;
+
+      		if(this.y == this.maxScrollY && parent.id == "page-list") {
+      			$('.load_more').trigger('click');
+      			app.loadMore = true;
+      		}
+      	}
+      });
     }
 		// $wrapper = $elm.find('[data-iscroll="scroller"]');
 		// if($wrapper.length == 0) return;
@@ -1901,7 +1918,7 @@ var app = app || (function($,undefined){
 		
 		if( app.map ){
 			app.currentMap = app.map;
-			app.currentMap.fixResize();
+			app.currentMap.refresh();
 
 			if( app.overlayItem ){
 				app.currentMap.removeOverlay(app.overlayItem);
@@ -2092,7 +2109,7 @@ var app = app || (function($,undefined){
 
 		app.places = app.tmpPlaces;
     
-    app.currentMap.fixResize();
+    app.currentMap.refresh();
 
     delete app.tmpPlaces;
 	};
@@ -2367,18 +2384,30 @@ var app = app || (function($,undefined){
         	horizontalAlign: 'center',
         	verticalOffset: -38,
         	horizontalOffset: -8,
-        	layer:'floatPane',
-        	clickButtonLeft:function(e){
-        		app.placeNearest = app.markerSelected.station;
-        		app.placeNearest.marker = app.markerSelected;
-						$.mobile.changePage('#page-route');
-        	},
-        	clickButtonRight:function(e){
-						app.stationSelected = app.markerSelected.station;
-						$.mobile.changePage('#page-station-details');
-        	}
+        	layer:'floatPane'
 		}, opts)); //drawOverlay
 	}; //app.setOverlayItem
+
+	$(".overlay-btn-left").live(clickEvent, function(e){
+	  e.preventDefault();
+	  e.stopPropagation();
+	  
+	  if(app.markerSelected) {
+		  app.placeNearest = app.markerSelected.station;
+			app.placeNearest.marker = app.markerSelected;
+			$.mobile.changePage('#page-route');
+		}
+	});
+
+	$(".overlay-btn-right").live(clickEvent, function(e){
+	  e.preventDefault();
+	  e.stopPropagation();
+	  
+	  if(app.markerSelected) {
+	  	app.stationSelected = app.markerSelected.station;
+			$.mobile.changePage('#page-station-details');
+	  }
+	});
 
 	app.setLocation = function(options){
 		$.info('[setLocation]');
@@ -2557,7 +2586,7 @@ $('.search_stations').live('submit', function(e){
 $('.load_more').live('click', function(e){
   e.preventDefault();
 
-  if(app.current_loaded[app.zone] < window.places[app.zone].length){
+  if(app.current_loaded[app.zone] < window.places[app.zone].length && app.loadMore){
     start_from = [window.places[app.zone][app.current_loaded[app.zone]], window.places[app.zone][app.current_loaded[app.zone]+1]];
     app.stations.push(window.places[app.zone][app.current_loaded[app.zone]]);
     app.stations.push(window.places[app.zone][app.current_loaded[app.zone]+1]);
@@ -2577,6 +2606,7 @@ $('.load_more').live('click', function(e){
       $(content).insertBefore('#page-list .ui-content .ui-listview .load_more');
       $('.ui-listview').listview("refresh");
       setTimeout(function () {
+      	app.loadMore = false;
         app.scrolls[$.mobile.activePage.attr('id')].refresh();
         app.scrolls[$.mobile.activePage.attr('id')].scrollTo(0, app.scrolls[$.mobile.activePage.attr('id')].maxScrollY, 800);
       }, 0);
